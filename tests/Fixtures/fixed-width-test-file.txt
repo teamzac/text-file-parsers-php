@@ -1,0 +1,2 @@
+00001DOE, JOHN JOHN@DOE.COM        yblue|red            100000.00100 main street
+00002DOE, JANE JANE@DOE.COM        norange|green        200000.00100 main street
