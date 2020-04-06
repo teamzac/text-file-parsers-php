@@ -1,0 +1,2 @@
+00001,"DOE, JOHN",JOHN@DOE.COM,y,"blue,red",100000.00,100 main street
+00002,"DOE, JANE",JANE@DOE.COM,n,"orange,green",200000.00,100 main street

@@ -1,0 +1,55 @@
+{
+    "name": "teamzac/text-file-parsers",
+    "description": "A package with handy tools for parsing text files of various formats",
+    "keywords": [
+        "teamzac",
+        "text-file-parsers"
+    ],
+    "homepage": "https://github.com/teamzac/text-file-parsers",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Chad Janicek",
+            "email": "chad@zactax.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^7.1",
+        "facade/ignition-contracts": "^1.0",
+        "illuminate/support": "^6.0|^7.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^4.0",
+        "phpunit/phpunit": "^8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "TeamZac\\Parsing\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "TeamZac\\Parsing\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "TeamZac\\Parsing\\ParsingServiceProvider"
+            ],
+            "aliases": {
+                "Parsing": "TeamZac\\Parsing\\Facades\\Parsing"
+            }
+        }
+    }
+}
