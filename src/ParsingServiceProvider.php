@@ -4,7 +4,7 @@ namespace TeamZac\Parsing;
 
 use Illuminate\Support\ServiceProvider;
 
-class TextFileParsersServiceProvider extends ServiceProvider
+class ParsingServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap the application services.
