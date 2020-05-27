@@ -103,6 +103,8 @@ class BaseField
 
     /**
      * Cast this value as a date
+     *
+     * @param string $format
      */
     public function asDate($format = 'Y-m-d')
     {
@@ -125,7 +127,7 @@ class BaseField
     /** 
      * Set the $valueMap property
      *
-     * @var array
+     * @param array
      * @return $this
      */
     public function map(array $values)
@@ -170,7 +172,7 @@ class BaseField
     /** 
      * Set the transform callback, which receives the raw value
      *
-     * @var Callable $callback
+     * @param Callable $callback
      * @return $this
      */
     public function transformWith($callback)
@@ -183,7 +185,7 @@ class BaseField
      * A convenient way to create a transformation callback
      * that simply explodes the raw value on the given delimiter
      *
-     * @var string $deimiter
+     * @param string $deimiter
      */
     public function explode($delimiter = ',')
     {
@@ -205,7 +207,7 @@ class BaseField
     /**
      * Cast the raw value 
      *
-     * @var string $value
+     * @param string $value
      * @return mixed
      */
     public function getCastedValue($value)
@@ -228,16 +230,33 @@ class BaseField
         } else if ($this->castAs == 'bool') {
             return (bool) $value;
         } else if ($this->castAs == 'date') {
-            return Carbon::createFromFormat($this->dateFormat, $value);
+            return $this->castToDate($value);
         }
 
         return $value;
     }
 
+    /** 
+     * Cast the value to a date based on the default format
+     * If the value is empty, return a null response
+     *
+     * @param string $value
+     * @return Carbon|null
+     * @throws \Carbon\Exceptions\InvalidFormatException
+     */
+    protected function castToDate($value)
+    {
+        if ($value === '') {
+            return null;
+        }
+
+        return Carbon::createFromFormat($this->dateFormat, $value);
+    }
+
     /**
      * Set the $castAs property
      *
-     * @var string $cast
+     * @param string $cast
      * @return $this
      */
     protected function as($cast)
