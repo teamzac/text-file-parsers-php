@@ -20,6 +20,9 @@ class DelimitedParser
     /** @var bool */
     protected $hasHeaders = false;
 
+    /** @var int */
+    protected $skip = 0;
+
     public function __construct($delimiter = ',') 
     {
         $this->delimiter = $delimiter;
@@ -60,6 +63,18 @@ class DelimitedParser
     public function hasHeaders()
     {
         $this->hasHeaders = true;
+        return $this;
+    }
+
+    /**
+     * Set the number of lines to skip
+     *
+     * @var int $skip
+     * @return $this
+     */
+    public function skip($skip)
+    {
+        $this->skip = $skip;
         return $this;
     }
 
@@ -111,9 +126,15 @@ class DelimitedParser
 
         $file = fopen($this->filepath, 'r');
         $count = 0;
+        $i = 0;
         while ($line = fgets($file)) {
             if ($count == 0 && $this->hasHeaders) {
                 $count++;
+                continue;
+            }
+
+            if ($i < $this->skip) {
+                $i++;
                 continue;
             }
 

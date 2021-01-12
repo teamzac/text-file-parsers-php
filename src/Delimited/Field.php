@@ -2,9 +2,9 @@
 
 namespace TeamZac\Parsing\Delimited;
 
-use TeamZac\Parsing\Support\TextField;
+use TeamZac\Parsing\Support\BaseField;
 
-class Field extends TextField
+class Field extends BaseField
 {
     /**
      * Static constructor, convenient for chaining additional constraints

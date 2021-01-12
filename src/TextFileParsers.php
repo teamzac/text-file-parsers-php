@@ -9,11 +9,11 @@ class TextFileParsers
 {
     public function fixedWidth()
     {
-        return FixedWidthParser::make();
+        return new FixedWidthParser();
     }
 
     public function delimited($delimiter = ',')
     {
-        return DelimitedParser::make($delimiter);
+        return new DelimitedParser($delimiter);
     }
 }

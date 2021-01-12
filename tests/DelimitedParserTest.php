@@ -4,10 +4,13 @@ namespace TeamZac\Parsing\Tests;
 
 use Carbon\Carbon;
 use Orchestra\Testbench\TestCase;
-use TeamZac\Parsing\Facades\Parsing;
 use TeamZac\Parsing\Delimited\Field;
-use TeamZac\Parsing\TextFileParsersServiceProvider;
+use TeamZac\Parsing\Exceptions\MissingLineDefinitionException;
+use TeamZac\Parsing\Exceptions\NoFileToParseException;
+use TeamZac\Parsing\Facades\Parsing;
+use TeamZac\Parsing\Tests\Fixtures\DelimitedTestDefinition;
 use TeamZac\Parsing\Tests\Fixtures\FixedWidthTestDefinition;
+use TeamZac\Parsing\TextFileParsersServiceProvider;
 
 class DelimitedParsingTest extends TestCase
 {
@@ -15,74 +18,91 @@ class DelimitedParsingTest extends TestCase
     {
         return [TextFileParsersServiceProvider::class];
     }
+    /** @test **/
+    public function it_parses_csv_by_default()
+    {
+        $line = 'john,doe,john@example.com';
+
+        $values = Parsing::delimited()
+            ->using([
+                Field::make('first_name'),
+                Field::make('last_name'),
+                Field::make('email'),
+            ])
+            ->parseLine($line);
+
+        $this->assertSame('john', $values->first_name);
+        $this->assertSame('doe', $values->last_name);
+        $this->assertSame('john@example.com', $values->email);
+    }
 
     /** @test */
-    public function it_parses_from_dedicated_definition_class()
+    public function it_can_use_a_custom_delimeter_value()
     {
+        $line = 'john|doe|john@example.com';
+
         $values = Parsing::delimited('|')
             ->using([
-                Field::make('rp'),
-                Field::int('appraisal_year'),
-                Field::int('account.number'),
-                Field::make('account.record_type'),
-                Field::int('account.sequence_number'),
-                Field::int('account.pidn'),
-                Field::make('owner.name'),
-                Field::make('owner.address.street'),
-                Field::make('owner.address.city_state'),
-                Field::make('owner.address.zip'),
-                Field::ignored('owner_zip4'),
-                Field::make('owner.crrt'),
-                Field::make('situs.address'),
-                Field::make('property_class'),
-                Field::make('maps.tad'),
-                Field::make('maps.mapsco'),
-                Field::make('codes.exemption'),
-                Field::make('codes.state_use'),
-                Field::make('legal.description'),
-                Field::make('legal.notice_date'),
-                Field::int('districts.county'),
-                Field::int('districts.city'),
-                Field::int('districts.school'),
-                Field::ignored(''),
-                Field::int('districts.special_1'),
-                Field::int('districts.special_2'),
-                Field::int('districts.special_3'),
-                Field::int('districts.special_4'),
-                Field::int('districts.special_5'),
-                Field::make('deed.date'),
-                Field::make('deed.book'),
-                Field::make('deed.page'),
-                Field::make('values.land'),
-                Field::make('values.improvement'),
-                Field::make('values.total'),
-                Field::make('improvements.garage_capacity'),
-                Field::make('improvements.num_bedrooms'),
-                Field::make('improvements.num_bathrooms'),
-                Field::int('year_built'),
-                Field::make('improvements.living_area'),
-                Field::make('improvements.swimming_pool'),
-                Field::ignored('arb_indicator'),
-                Field::make('codes.ag'),
-                Field::make('land.acres'),
-                Field::make('land.square_footage'),
-                Field::make('ag.acres'),
-                Field::make('ag.value'),
-                Field::make('improvements.central_heat')->map([
-                    'Y' => true, 'N' => false,
-                ]),
-                Field::make('improvements.central_air')->map([
-                    'Y' => true, 'N' => false,
-                ]),
-                Field::make('improvements.structure_count'),
-                Field::ignored('from_accounts'),
-                Field::make('appraisal.date'),
-                Field::make('appraisal.value'),
+                Field::make('first_name'),
+                Field::make('last_name'),
+                Field::make('email'),
             ])
-            ->hasHeaders()
+            ->parseLine($line);
+
+        $this->assertSame('john', $values->first_name);
+        $this->assertSame('doe', $values->last_name);
+        $this->assertSame('john@example.com', $values->email);
+    }
+
+    /** @test */
+    public function it_can_use_a_custom_definition_class()
+    {
+        $values = Parsing::delimited()
+            ->using(DelimitedTestDefinition::class)
             ->parse(__DIR__.'/Fixtures/delimited-test-file.txt')
-            ->each(function($line) {
-                dd($line);
-            });
+            ->all();
+
+        $this->assertCount(2, $values);
+        tap($values[0], function($first) {
+            $this->assertSame(1, $first->id);
+            $this->assertSame('DOE, JOHN', $first->name);
+            $this->assertSame('JOHN@DOE.COM', $first->email);
+            $this->assertTrue($first->active);
+            $this->assertSame([
+                'blue', 'red'
+            ], $first->favorite_colors);
+            $this->assertSame(100000.0, $first->salary);
+            $this->assertSame('100 MAIN STREET', $first->get('address.uppercased'));
+        });
+    }
+
+    /** @test */
+    public function it_throws_an_exception_if_no_file_is_given()
+    {
+        try {
+            $values = Parsing::delimited()
+                ->using(DelimitedTestDefinition::class)
+                // ->parse(__DIR__.'/Fixtures/delimited-test-file.txt')
+                ->all();
+        } catch (NoFileToParseException $e) {
+            return $this->assertNotNull($e);
+        }
+
+        $this->fail('Expected exception for lack of file');
+    }
+
+    /** @test */
+    public function it_throws_an_exception_if_no_definition_is_given()
+    {
+        try {
+            $values = Parsing::delimited()
+                // ->using(DelimitedTestDefinition::class)
+                ->parse(__DIR__.'/Fixtures/delimited-test-file.txt')
+                ->all();
+        } catch (MissingLineDefinitionException $e) {
+            return $this->assertNotNull($e);
+        }
+
+        $this->fail('Expected exception for lack of line definition');
     }
 }

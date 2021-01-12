@@ -14,6 +14,9 @@ class FixedWidthParser
     /** @var string */
     protected $filepath;
 
+    /** @var int */
+    protected $skip = 0;
+
     /**
      * Static constructor
      */
@@ -38,6 +41,18 @@ class FixedWidthParser
             $this->definition = new AnonymousFixedWidthLine($definition);
         }
 
+        return $this;
+    }
+
+    /**
+     * Set the number of lines to skip
+     *
+     * @var int $skip
+     * @return $this
+     */
+    public function skip($skip)
+    {
+        $this->skip = $skip;
         return $this;
     }
 
@@ -88,7 +103,12 @@ class FixedWidthParser
         }
 
         $file = fopen($this->filepath, 'r');
+        $i = 0;
         while ($line = fgets($file)) {
+            if ($i < $this->skip) {
+                $i++;
+                continue;
+            }
             $callback($this->parseLine($line));
         }
         fclose($file);

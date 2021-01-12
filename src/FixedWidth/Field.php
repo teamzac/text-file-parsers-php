@@ -2,10 +2,10 @@
 
 namespace TeamZac\Parsing\FixedWidth;
 
-use Carbon\Carbon;
 use Illuminate\Support\Arr;
+use TeamZac\Parsing\Support\BaseField;
 
-class Field
+class Field extends BaseField
 {
     /**
      * The number of characters for this field

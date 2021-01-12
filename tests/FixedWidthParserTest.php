@@ -4,11 +4,13 @@ namespace TeamZac\Parsing\Tests;
 
 use Carbon\Carbon;
 use Orchestra\Testbench\TestCase;
+use TeamZac\Parsing\Exceptions\MissingLineDefinitionException;
+use TeamZac\Parsing\Exceptions\NoFileToParseException;
 use TeamZac\Parsing\Facades\Parsing;
 use TeamZac\Parsing\FixedWidth\Field;
 use TeamZac\Parsing\FixedWidth\FixedWidthParser;
-use TeamZac\Parsing\TextFileParsersServiceProvider;
 use TeamZac\Parsing\Tests\Fixtures\FixedWidthTestDefinition;
+use TeamZac\Parsing\TextFileParsersServiceProvider;
 
 class FixedWidthParsingTest extends TestCase
 {
@@ -18,7 +20,7 @@ class FixedWidthParsingTest extends TestCase
     }
     
     /** @test */
-    public function it_splits_fixed_width_files_based_on_the_definition()
+    public function it_performs_simple_parsing()
     {
         $rowText = '  A  B  C';
 
@@ -256,5 +258,35 @@ class FixedWidthParsingTest extends TestCase
             $this->assertSame(100000.0, $first->salary);
             $this->assertSame('100 MAIN STREET', $first->get('address.uppercased'));
         });
+    }
+    
+    /** @test */
+    public function it_throws_an_exception_if_no_file_is_given()
+    {
+        try {
+            $values = Parsing::fixedWidth()
+                ->using(FixedWidthTestDefinition::class)
+                // ->parse(__DIR__.'/Fixtures/fixed-width-test-file.txt')
+                ->all();
+        } catch (NoFileToParseException $e) {
+            return $this->assertNotNull($e);
+        }
+
+        $this->fail('Expected exception for lack of file');
+    }
+
+    /** @test */
+    public function it_throws_an_exception_if_no_definition_is_given()
+    {
+        try {
+            $values = Parsing::fixedWidth()
+                // ->using(FixedWidthTestDefinition::class)
+                ->parse(__DIR__.'/Fixtures/fixed-width-test-file.txt')
+                ->all();
+        } catch (MissingLineDefinitionException $e) {
+            return $this->assertNotNull($e);
+        }
+
+        $this->fail('Expected exception for lack of line definition');
     }
 }
