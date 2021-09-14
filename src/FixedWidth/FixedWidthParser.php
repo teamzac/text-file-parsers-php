@@ -3,10 +3,11 @@
 namespace TeamZac\Parsing\FixedWidth;
 
 use Illuminate\Support\Arr;
-use TeamZac\Parsing\Support\ParsedLine;
 use TeamZac\Parsing\Exceptions\CouldNotParseException;
+use TeamZac\Parsing\Support\BaseParser;
+use TeamZac\Parsing\Support\ParsedLine;
 
-class FixedWidthParser
+class FixedWidthParser extends BaseParser
 {
     /** @var string */
     protected $definition;
@@ -86,41 +87,13 @@ class FixedWidthParser
         return $values;
     }
 
-    /** 
-     * Parse the file and return each record one at a time.
-     * Definitely use this for larger files instead of all()
-     *
-     * @param   Callable $callback
-     */
-    public function each($callback) 
-    {
-        if (is_null($this->filepath)) {
-            throw CouldNotParseException::noFile();
-        }
-
-        if (is_null($this->definition)) {
-            throw CouldNotParseException::noLineDefinition();
-        }
-
-        $file = fopen($this->filepath, 'r');
-        $i = 0;
-        while ($line = fgets($file)) {
-            if ($i < $this->skip) {
-                $i++;
-                continue;
-            }
-            $callback($this->parseLine($line));
-        }
-        fclose($file);
-    }
-
     /**
      * 
      * 
      * @param   
      * @return  
      */
-    public function parseLine($line)
+    public function parseLine($line): ParsedLine
     {
         $columnPointer = 0;
         $attributes = [];

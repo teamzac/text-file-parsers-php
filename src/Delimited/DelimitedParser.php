@@ -3,10 +3,11 @@
 namespace TeamZac\Parsing\Delimited;
 
 use Illuminate\Support\Arr;
+use TeamZac\Parsing\Support\BaseParser;
 use TeamZac\Parsing\Support\ParsedLine;
 use TeamZac\Parsing\Exceptions\CouldNotParseException;
 
-class DelimitedParser
+class DelimitedParser extends BaseParser
 {
     /** @var string */
     protected $delimiter = ',';
@@ -116,13 +117,8 @@ class DelimitedParser
      */
     public function each($callback) 
     {
-        if (is_null($this->filepath)) {
-            throw CouldNotParseException::noFile();
-        }
-
-        if (is_null($this->definition)) {
-            throw CouldNotParseException::noLineDefinition();
-        }
+        $this->verifyFilepathWasGiven()
+            ->verifyLineDefinitionExists();
 
         $file = fopen($this->filepath, 'r');
         $count = 0;
@@ -139,6 +135,7 @@ class DelimitedParser
             }
 
             $callback($this->parseLine($line));
+            unset($line);
         }
         fclose($file);
     }
@@ -149,21 +146,27 @@ class DelimitedParser
      * @param   
      * @return  
      */
-    public function parseLine($text)
+    public function parseLine($text): ParsedLine
     {
         $columns = str_getcsv($text, $this->delimiter);
 
         $attributes = [];
-        foreach ($this->definition->fieldDefinitions() as $index => $field) {
+        $definitions = $this->definition->fieldDefinitions();
+        foreach ($definitions as $index => $field) {
             if ($field->shouldBeIncluded()) {
-                Arr::set(
-                    $attributes, 
-                    $field->getKey(), 
-                    $field->getCastedValue($columns[$index])
-                );
+                try {
+                    Arr::set(
+                        $attributes, 
+                        $field->getKey(), 
+                        $field->getCastedValue($columns[$index])
+                    );
+                } catch (\Exception $e) {
+                    dd($e->getMessage(), $index, $columns);
+                }
             }
         }
 
+        unset($columns, $definitions);
         return new ParsedLine($attributes);
     }
 }

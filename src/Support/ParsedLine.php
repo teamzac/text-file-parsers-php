@@ -38,4 +38,14 @@ class ParsedLine
     {
         return Arr::get($this->attributes, $key);
     }
+
+    public function only($keys)
+    {
+        return Arr::only($this->attributes, $keys);
+    }
+
+    public function pluck($value, $key = null)
+    {
+        return Arr::pluck($this->attributes, $value, $key);
+    }
 }

@@ -18,6 +18,7 @@ class DelimitedParsingTest extends TestCase
     {
         return [TextFileParsersServiceProvider::class];
     }
+
     /** @test **/
     public function it_parses_csv_by_default()
     {
@@ -57,22 +58,17 @@ class DelimitedParsingTest extends TestCase
     /** @test */
     public function it_can_use_a_custom_definition_class()
     {
-        $values = Parsing::delimited()
+        $values = Parsing::delimited('|')
+            ->hasHeaders()
             ->using(DelimitedTestDefinition::class)
             ->parse(__DIR__.'/Fixtures/delimited-test-file.txt')
             ->all();
 
-        $this->assertCount(2, $values);
+        $this->assertCount(15, $values);
         tap($values[0], function($first) {
-            $this->assertSame(1, $first->id);
-            $this->assertSame('DOE, JOHN', $first->name);
-            $this->assertSame('JOHN@DOE.COM', $first->email);
-            $this->assertTrue($first->active);
-            $this->assertSame([
-                'blue', 'red'
-            ], $first->favorite_colors);
-            $this->assertSame(100000.0, $first->salary);
-            $this->assertSame('100 MAIN STREET', $first->get('address.uppercased'));
+            $this->assertSame('M', $first->type);
+            $this->assertSame('2019', $first->year);
+            $this->assertSame('64101063', $first->get('account_number'));
         });
     }
 
@@ -80,7 +76,7 @@ class DelimitedParsingTest extends TestCase
     public function it_throws_an_exception_if_no_file_is_given()
     {
         try {
-            $values = Parsing::delimited()
+            $values = Parsing::delimited('|')
                 ->using(DelimitedTestDefinition::class)
                 // ->parse(__DIR__.'/Fixtures/delimited-test-file.txt')
                 ->all();
@@ -95,7 +91,7 @@ class DelimitedParsingTest extends TestCase
     public function it_throws_an_exception_if_no_definition_is_given()
     {
         try {
-            $values = Parsing::delimited()
+            $values = Parsing::delimited('|')
                 // ->using(DelimitedTestDefinition::class)
                 ->parse(__DIR__.'/Fixtures/delimited-test-file.txt')
                 ->all();

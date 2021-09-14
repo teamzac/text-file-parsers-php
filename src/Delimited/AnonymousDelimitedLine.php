@@ -3,7 +3,7 @@
 namespace TeamZac\Parsing\Delimited;
 
 use Exception;
-use TeamZac\Parsing\Support\TextField;
+use TeamZac\Parsing\Support\BaseField;
 use TeamZac\Parsing\Contracts\LineDefinition;
 
 class AnonymousDelimitedLine implements LineDefinition
@@ -14,7 +14,7 @@ class AnonymousDelimitedLine implements LineDefinition
     public function __construct($definitions = [])
     {
         foreach ($definitions as $field) {
-            if (! $field instanceof TextField) {
+            if (! $field instanceof BaseField) {
                 throw new Exception('You did not provide a Field object to define how to parse the line');
             }
         }
